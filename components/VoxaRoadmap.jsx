@@ -1,5 +1,3 @@
-'use client';
-
 import { useState } from "react";
 
 const roadmap = [
@@ -1308,16 +1306,30 @@ const roadmap = [
 ];
 
 export default function VoxaRoadmap() {
-  const [completedTasks, setCompletedTasks] = useState({});
-  const [expandedSections, setExpandedSections] = useState({});
+  const [completedTasks, setCompletedTasks] = useState(() => {
+    if (typeof window === "undefined") return {};
+    try { return JSON.parse(localStorage.getItem("voxa-completed") || "{}"); } catch { return {}; }
+  });
+  const [expandedSections, setExpandedSections] = useState(() => {
+    if (typeof window === "undefined") return {};
+    try { return JSON.parse(localStorage.getItem("voxa-sections") || "{}"); } catch { return {}; }
+  });
   const [activePhase, setActivePhase] = useState(null);
 
   const toggleTask = (id) => {
-    setCompletedTasks(prev => ({ ...prev, [id]: !prev[id] }));
+    setCompletedTasks(prev => {
+      const next = { ...prev, [id]: !prev[id] };
+      localStorage.setItem("voxa-completed", JSON.stringify(next));
+      return next;
+    });
   };
 
   const toggleSection = (key) => {
-    setExpandedSections(prev => ({ ...prev, [key]: !prev[key] }));
+    setExpandedSections(prev => {
+      const next = { ...prev, [key]: !prev[key] };
+      localStorage.setItem("voxa-sections", JSON.stringify(next));
+      return next;
+    });
   };
 
   const totalTasks = roadmap.reduce((acc, phase) =>
